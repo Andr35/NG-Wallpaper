@@ -6,6 +6,7 @@ from PIL import Image, ImageDraw, ImageFont
 from StringIO import StringIO
 import commands
 import sys
+import getopt
 import os
 
 # url of National Geographic - Photo of the Day site
@@ -14,9 +15,45 @@ BASE_URL = "http://photography.nationalgeographic.com/photography/photo-of-the-d
 IMAGE_FILE_URL = "/tmp/ngwp.jpg"
 # url of a backup image which will be set in case of no Internet connection or other troubles
 BACKUP_IMAGE_FILE_URL = "/usr/share/backgrounds/linuxmint-qiana/sayantan_7864647044.jpg"
+# boolean to check if writing captions or not on the image
+write_caption = True
 # url of font used to write the caption of the image
 FONT_URL = "/home/andrea/.fonts/Lato-Bold.ttf"
 # FONT_URL = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+
+
+# START FUNCTION
+def main (argv):
+    global write_caption
+
+    # parse arguments
+    try:
+        opts, args = getopt.getopt(argv[1:],'hn', ['help', 'no_caption'])
+    except getopt.GetoptError:
+        print_help_msg(argv[0])
+        sys.exit(-1)
+
+    for opt, arg in opts:
+        if (opt in ('-h', '--help')):
+            print_help_msg(argv[0])
+            sys.exit(0)
+        elif (opt in ('-n', '--no_caption')):
+            write_caption = False
+
+    print("Setting the National Geographic, Photo of the Day wallpaper...")
+    # get and set the image
+    result = get_national_geographic()
+    if (result == 0): # ng image retrieved
+        result = set_wallpaper(IMAGE_FILE_URL)
+        if (result != 0): # fail to set the ng image
+            result = set_wallpaper(BACKUP_IMAGE_FILE_URL)
+    else: # set the backup image
+        set_wallpaper(BACKUP_IMAGE_FILE_URL)
+
+def print_help_msg(app):
+    print("Usage: %s [-nh]\n"\
+    " -n | --no_caption\tSet wallpaper without write the caption on the image.\n"\
+    " -h | --help\t\tShow help message." % app)
 
 # download the image from the site
 def get_national_geographic():
@@ -45,14 +82,16 @@ def get_national_geographic():
 
         image_raw = res.content
 
-        # edit the image (add caption)
         i = Image.open(StringIO(image_raw))
-        font = ImageFont.truetype(FONT_URL, 14)
-        draw = ImageDraw.Draw(i);
-        width = i.size[0] - (6.4 * len(image_caption)) - 10
-        height = i.size[1] - 29 - 82
-        if ((width >= 0) and (height >= 0)):
-            draw.text((width,height), image_caption, (255, 255, 255), font=font)
+
+        # edit the image (add caption)
+        if (write_caption):
+            font = ImageFont.truetype(FONT_URL, 14)
+            draw = ImageDraw.Draw(i);
+            width = i.size[0] - (6.4 * len(image_caption)) - 10
+            height = i.size[1] - 29 - 82
+            if ((width >= 0) and (height >= 0)):
+                draw.text((width,height), image_caption, (255, 255, 255), font=font)
 
         # save the image
         i.save(IMAGE_FILE_URL)
@@ -114,13 +153,5 @@ def get_desktop_environment():
     return "unknown"
 
 
-# START
-print("Setting the National Geographic, Photo of the Day wallpaper...")
-
-result = get_national_geographic()
-if (result == 0): # ng image retrieved
-    result = set_wallpaper(IMAGE_FILE_URL)
-    if (result != 0): # fail to set the ng image
-        result = set_wallpaper(BACKUP_IMAGE_FILE_URL)
-else: # set the backup image
-    set_wallpaper(BACKUP_IMAGE_FILE_URL)
+# start the script
+main(sys.argv)

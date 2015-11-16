@@ -136,8 +136,8 @@ def get_national_geographic(url, write_caption, font_url, font_size):
         if (write_caption):
             font = ImageFont.truetype(font_url, font_size)
             draw = ImageDraw.Draw(i)
-            width = i.size[0] - (6.4 * len(image_caption)) - 10
-            height = i.size[1] - 29 - 82
+            width = i.size[0] - ((0.457 * font_size) * len(image_caption)) - 10
+            height = i.size[1] - 29 - (82 * 0.8) - (font_size * 1.2)
             if ((width >= 0) and (height >= 0)):
                 draw.text((width,height), image_caption, (255, 255, 255), font=font)
 

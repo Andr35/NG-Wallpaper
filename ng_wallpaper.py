@@ -16,7 +16,7 @@ BASE_URL = "http://photography.nationalgeographic.com/photography/photo-of-the-d
 IMAGE_FILE_URL_LINUX = "/tmp/ngwp.jpg"
 IMAGE_FILE_URL_WINDOWS = "C://Windows//Temp//ngwp.jpg"
 # url of a backup image which will be set in case of no Internet connection or other troubles
-BACKUP_IMAGE_FILE_URL_LINUX = "/usr/share/backgrounds/linuxmint-qiana/sayantan_7864647044.jpg"
+BACKUP_IMAGE_FILE_URL_LINUX = "/usr/share/backgrounds/linuxmint-rosa/jankaluza_electric_apple.jpg"
 BACKUP_IMAGE_FILE_URL_WINDOWS = "C://Windows//Web//Wallpaper//Windows//img0.jpg"
 # font used to write the caption of the image
 FONT_URL_WINDOWS = "arial.ttf"

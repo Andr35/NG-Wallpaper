@@ -3,8 +3,10 @@
 import requests
 from pyquery import PyQuery as pq
 from PIL import Image, ImageDraw, ImageFont
-from StringIO import StringIO
-import commands
+# import StringIO
+import io
+# import commands
+import subprocess
 import sys
 import getopt
 import os
@@ -20,7 +22,7 @@ BACKUP_IMAGE_FILE_URL_LINUX = "/usr/share/backgrounds/linuxmint-rosa/jankaluza_e
 BACKUP_IMAGE_FILE_URL_WINDOWS = "C://Windows//Web//Wallpaper//Windows//img0.jpg"
 # font used to write the caption of the image
 FONT_URL_WINDOWS = "arial.ttf"
-FONT_URL_LINUX = "/home/andrea/.fonts/Lato-Bold.ttf"
+FONT_URL_LINUX = "/home/andrea/.local/share/fonts/Lato-Bold.ttf"
 # FONT_URL_LINUX = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 FONT_SIZE = 14
 
@@ -60,7 +62,7 @@ def main (argv):
         opts, args = getopt.getopt(argv[1:],'hns:b:f:d:', ['help', 'no_caption', 'image_location=', 'backup_image=', 'font=', 'font_size='])
     except getopt.GetoptError:
         print_help_msg(argv[0])
-        sys.exit(-1)
+        sys.exit(1)
 
     for opt, arg in opts:
         if (opt in ('-h', '--help')):
@@ -79,7 +81,7 @@ def main (argv):
                 the_font_size = int(arg)
             else:
                 print("> Font size is not a number.")
-                sys.exit(-1)
+                sys.exit(1)
 
 
     print("Setting the National Geographic, Photo of the Day wallpaper...")
@@ -89,8 +91,10 @@ def main (argv):
     if (result == 0): # ng image retrieved
         result = set_wallpaper(the_url)
         if (result != 0): # fail to set the ng image
+            print("> Setting the backup image")
             result = set_wallpaper(the_backup_url)
     else: # set the backup image
+        print("> Setting the backup image")
         set_wallpaper(the_backup_url)
 
 def print_help_msg(app):
@@ -129,8 +133,7 @@ def get_national_geographic(url, write_caption, font_url, font_size):
             return -1
 
         image_raw = res.content
-
-        i = Image.open(StringIO(image_raw))
+        i = Image.open(io.BytesIO(image_raw))
 
         # edit the image (add caption)
         if (write_caption):
@@ -150,7 +153,7 @@ def get_national_geographic(url, write_caption, font_url, font_size):
         print("> Error: it seems that there are problems with the Internet connection")
         return -1
     except IOError:
-        print("> Error: Input-Output error has been raised. Check permissions or the urls of the given paths")
+        print("> Error: Input-Output error has been raised. Check permissions or the Urls of the given paths")
         return -1
 
 def set_wallpaper(url):
@@ -170,21 +173,23 @@ def set_wallpaper(url):
         if (desktop_env in ["gnome", "unity","cinnamon", "mate"]):
             # set the schema-key depending on the environment
             if desktop_env in ["gnome", "unity"]:
+
                 SCHEMA = "org.gnome.desktop.background picture-uri"
             elif desktop_env=="cinnamon":
                 SCHEMA = "org.cinnamon.desktop.background picture-uri"
             elif desktop_env=="mate":
                 SCHEMA = "org.mate.background picture-filename"
+         
             #set wallpaper command
-            cmd = "gsettings set %s 'file://%s'" % (SCHEMA, url)
+            cmd = "gsettings set %s file://%s" % (SCHEMA, url)
 
         elif (desktop_env in ["fluxbox","jwm","openbox","afterstep"]):
             cmd = "fbsetbg -f %s" % url
 
-        cmd_status, cmd_output = commands.getstatusoutput(cmd)
+        cmd_status = subprocess.call(cmd, shell=True)
 
         if (cmd_status != 0):
-            print(cmd_status)
+            print("> Error while setting the new background")
             return -1
 
     return 0

@@ -1,7 +1,12 @@
 # NG Wallpaper
 -----
 
-A python script to set the National geographic's photos of the day as wallpaper on Linux distributions or Windows.
+A Python 3 script to set the National geographic's photos of the day as wallpaper on Linux distributions or Windows.
+
+##### Dependencies:
+- requests
+- pyquery
+- PIL (Pillow)
 
 ##### Usage:
 ```
